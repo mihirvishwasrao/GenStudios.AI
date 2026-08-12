@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GenStudios.AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d10;--panel:#12161b;--panel2:#171c22;--line:#2a313a;--text:#f3f5f7;--muted:#9ca6b2;--accent:#d9ff4f}
+*{box-sizing:border-box}html,body,button,select{font-family:"Poppins",sans-serif}body{margin:0;background:var(--bg);color:var(--text)}
+header{padding:28px 34px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:20px;position:sticky;top:0;background:rgba(11,13,16,.95);backdrop-filter:blur(14px);z-index:5}
+h1{font-size:26px;margin:0 0 5px;font-weight:400}.sub{font-size:14px;color:var(--muted);font-weight:400}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:10px 14px;border-radius:8px;font-size:12px;font-weight:400;letter-spacing:1.4px;cursor:pointer}button:hover{border-color:#59636f}.primary{background:var(--accent);color:#0b0d10;border-color:var(--accent)}
+.layout{display:grid;grid-template-columns:minmax(500px,1.05fr) minmax(430px,.95fr);gap:20px;padding:22px;max-width:1700px;margin:auto}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.head{padding:15px 18px;border-bottom:1px solid var(--line);font-size:14px;font-weight:400;letter-spacing:1.4px}.body{padding:18px}
+.section{margin-bottom:20px}.title{font-size:12px;color:var(--accent);font-weight:400;letter-spacing:1.4px;margin-bottom:10px;display:flex;align-items:center;min-height:18px}
+.section.disabled{opacity:.48}
+.section.disabled .title{color:var(--muted)}
+.section-toggle{appearance:none;-webkit-appearance:none;width:15px;height:15px;border:1px solid var(--accent);border-radius:3px;background:transparent;display:inline-grid;place-items:center;vertical-align:middle;margin:0 8px 0 0;flex:0 0 auto;cursor:pointer;position:relative}
+.section-toggle:checked{background:var(--accent);border-color:var(--accent)}
+.brand-gen{color:var(--accent)}
+.section-toggle:checked::after{content:"";width:7px;height:4px;border-left:2px solid #0b0d10;border-bottom:2px solid #0b0d10;transform:rotate(-45deg);margin-top:-2px}
+.section.disabled select,.section.disabled input[type="radio"]{pointer-events:none}
+.camera-control{display:flex;gap:18px;flex-wrap:wrap;margin:2px 0 12px}
+.camera-choice{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text);cursor:pointer}
+.camera-choice input[type="radio"]{appearance:none;-webkit-appearance:none;width:14px;height:14px;border:1px solid var(--accent);border-radius:50%;background:transparent;display:grid;place-items:center;cursor:pointer}
+.camera-choice input[type="radio"]:checked{background:var(--accent);border-color:var(--accent)}
+.camera-choice input[type="radio"]:checked::after{content:"";width:6px;height:6px;border-radius:50%;background:#0b0d10}
+.camera-views{display:none;margin-top:10px}
+.camera-views.active{display:block}
+.camera-views .field{max-width:100%}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:5px}label{font-size:12px;color:var(--muted);font-weight:400}
+input[type="text"]{width:100%;background:#0d1115;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:10px;font-size:13px;font-weight:400;outline:none}
+input[type="text"]:focus{border-color:#65717e}
+select{width:100%;background:#0d1115;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:10px;font-size:13px;font-weight:400;outline:none}select:focus{border-color:#65717e}
+.output{position:sticky;top:100px;height:calc(100vh - 122px);min-height:600px;display:flex;flex-direction:column}.outbody{flex:1;padding:18px;overflow:auto}
+.prompt{white-space:pre-wrap;line-height:1.65;font-size:13px;font-weight:400;color:#e7ebef;background:#0a0d10;border:1px solid var(--line);border-radius:9px;padding:16px;min-height:430px}
+.status{display:flex;justify-content:space-between;padding:11px 18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.pill{color:var(--accent);font-weight:400}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.output{position:relative;top:auto;height:auto}}@media(max-width:650px){header{padding:20px;display:block}.actions{margin-top:15px}.layout{padding:12px}.grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><div><h1><span class="brand-gen">Gen</span>Studios.AI</h1><div class="sub">Architecture Visualization Prompt Engine by Ar. Mihir Vishwasrao</div></div>
+<div class="actions"><button onclick="resetAll()">RESET</button><button onclick="forceRefreshOptions()">REFRESH OPTIONS</button><button onclick="copyPrompt()">COPY MASTER PROMPT</button><button class="primary" onclick="downloadPrompt()">DOWNLOAD .TXT</button></div></header>
+<div class="layout"><div class="panel"><div class="head">Prompt Controls</div><div class="body"><div id="form"></div></div></div>
+<div class="panel output"><div class="head">Master Prompt</div><div class="outbody"><div class="prompt" id="prompt"></div></div><div class="status"><span><span class="pill" id="count">0</span> characters</span><span>GenStudios.AI</span></div></div></div>
+<script>
+const SHEET_WEB_APP_URL="https://script.google.com/macros/s/AKfycbwhDjMPb_Kq_Fjl6s-X5POdMcvtBdS2XrDKXKDHstSQ_yDSp0dw_mRPereTzlcli2x4qQ/exec";
+const FALLBACK=[{"section": "PROJECT TYPE", "items": [{"id": "project", "label": "Project Type", "options": ["Apartment Building", "Commercial", "Cultural", "Educational", "Government / Civic", "High-Rise Residential", "Hospital", "Hotel / Resort", "Industrial", "Institutional", "Interior", "Landscape / Public Realm", "Mixed-Use", "Office", "Prison / Penitentiary", "Religious", "Residential Villa"]}, {"id": "style", "label": "Design Language", "options": ["Art Deco", "Brutalist", "Colonial", "Contemporary", "Indian Contemporary", "Industrial", "Japanese Minimal", "Mediterranean", "Minimalist", "Modernist", "Monumental", "Neo-Classical", "Regional / Vernacular", "Timeless Civic", "Tropical Modern"]}]}, {"section": "MATERIALS", "items": [{"id": "primary", "label": "Primary Material", "options": ["Brick", "Corten Steel", "Exposed Concrete", "Fair-Faced Concrete", "Glass", "Limestone", "Marble", "Metal", "Mixed Materials", "Natural Stone", "Red Brick", "Red Sandstone", "Sandstone", "Stucco", "Timber", "Travertine", "White Plaster"]}, {"id": "secondary", "label": "Secondary Material", "options": ["Brick", "Concrete", "Corten Steel", "Glass", "Metal", "None", "Perforated Metal", "Plaster", "Stone", "Terracotta", "Timber"]}, {"id": "glass", "label": "Glass", "options": ["Blue Tinted", "Bronze Tinted", "Clear", "Green Tinted", "Highly Reflective", "Low-E Neutral", "No Glass", "Slightly Reflective", "Smoked"]}]}, {"section": "SITE & ENVIRONMENT", "items": [{"id": "vegetation", "label": "Vegetation", "options": ["Dense Tropical", "Dry / Arid", "Formal Landscape", "Lush", "Moderate", "Native / Regional", "None", "Seasonal", "Sparse", "Wild Natural Landscape"]}, {"id": "weather", "label": "Weather", "options": ["After Rain", "Clear Sky", "Dramatic Clouds", "Dusty / Atmospheric", "Hazy", "Heavy Rain", "Light Rain", "Overcast", "Soft Cloudy"]}, {"id": "time", "label": "Time / Lighting", "options": ["Blue Hour", "Bright Daylight", "Golden Hour", "Late Afternoon", "Night", "Overcast Day", "Soft Morning", "Studio-Like Soft Light", "Sunset"]}, {"id": "light", "label": "Lighting Quality", "options": ["Crisp Directional", "Dappled Natural Light", "Dramatic Chiaroscuro", "High Dynamic Range", "Interior Warm Ambient", "Mixed Natural + Artificial", "Soft Ambient", "Soft Diffuse", "Warm Directional"]}]}, {"section": "CAMERA & COMPOSITION", "items": [{"id": "height", "label": "Camera Height", "options": ["Aerial 10m", "Aerial 20m", "Aerial 45°", "Eye Level 1.6m", "Eye Level 1.7m", "Eye Level 1.8m", "High 4m", "Low 1.2m", "Low 1.4m", "Medium 2.5m"]}, {"id": "composition", "label": "Shot / Composition", "options": ["3/4 Perspective", "Axonometric", "Central Composition", "Corner Perspective", "Elevated Forward-Looking", "Isometric", "Layered Foreground-Midground-Background", "Leading Lines", "Panoramic", "Rule of Thirds", "Straight-On", "Symmetrical", "Top-Down"]}, {"id": "lens", "label": "Lens", "options": ["24mm Wide Angle", "28mm Wide Angle", "35mm Architectural", "40mm Natural Perspective", "50mm Standard", "70mm Short Telephoto", "85mm Telephoto", "Tilt-Shift 24mm", "Tilt-Shift 35mm", "Tilt-Shift 45mm"]}, {"id": "dof", "label": "Depth of Field", "options": ["Architectural Deep Focus", "Deep Focus", "Moderate Depth of Field", "Shallow Depth of Field"]}]}, {"section": "LIFE & PHOTOGRAPHY STYLE", "items": [{"id": "people", "label": "People", "options": ["Architectural Editorial", "Busy but Controlled", "Few Natural Occupants", "Moderate Activity", "No Visible People", "None", "Sparse"]}, {"id": "vehicles", "label": "Vehicles", "options": ["Architecturally Appropriate Vehicles", "Few Parked Cars", "Luxury Vehicles", "Moderate Traffic", "No Visible Vehicles", "None", "Sparse Traffic"]}, {"id": "photo", "label": "Photography Style", "options": ["ArchDaily Editorial", "Architectural Digest", "Cinematic Architecture", "Dezeen Editorial", "Documentary Architecture", "High-End Commercial Photography", "Luxury Real Estate", "Professional Architectural Photography"]}, {"id": "grade", "label": "Color / Grade", "options": ["Cinematic Neutral", "Cool Natural", "Film-Like", "High Dynamic Range", "Muted Editorial", "Natural Documentary", "Neutral", "Warm Natural"]}]}, {"section": "REALISM & OUTPUT", "items": [{"id": "realism", "label": "Realism Level", "options": ["Highly Photorealistic", "Hyperreal but Physically Plausible", "Magazine-Ready Photorealism", "Realistic", "Ultra-Photorealistic"]}, {"id": "engine", "label": "Render / Image Look", "options": ["Corona", "D5 Render", "Enscape", "Neutral Photographic", "No Obvious CGI Look", "Physically Based Rendering", "Unreal Engine 5", "V-Ray"]}, {"id": "quality", "label": "Output Quality", "options": ["4K", "6K", "8K", "Editorial Print Quality", "Ultra High Resolution"]}, {"id": "geometry", "label": "Geometry Lock", "options": ["Absolute / Do Not Alter", "Strict", "Very Strict"]}]}];
+let groups=FALLBACK;
+const SECTION_ORDER=[
+  "PROJECT TYPE",
+  "MATERIALS",
+  "SITE & ENVIRONMENT",
+  "CAMERA & COMPOSITION",
+  "LIFE & PHOTOGRAPHY STYLE",
+  "REALISM & OUTPUT"
+];
+
+const DEFAULTS = {
+  project:"Not Selected", style:"Not Selected",
+  primary:"Not Selected", secondary:"Not Selected", glass:"Not Selected",
+  vegetation:"Not Selected", weather:"Not Selected", time:"Not Selected", light:"Not Selected",
+  composition:"Not Selected", dof:"Not Selected",
+  people:"Not Selected", vehicles:"Not Selected", photo:"Not Selected", grade:"Not Selected",
+  realism:"Not Selected", engine:"Not Selected", quality:"Not Selected",
+  geometry:"Not Selected"
+};
+
+const sectionState={};
+let cameraMode="lock";
+let cameraView="Not Selected";
+let locationValue="";
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+function buildForm(){
+  const ordered=[...groups].sort((a,b)=>{
+    const ai=SECTION_ORDER.indexOf(a.section), bi=SECTION_ORDER.indexOf(b.section);
+    return (ai<0?999:ai)-(bi<0?999:bi);
+  });
+
+  let h="";
+  ordered.forEach(g=>{
+    const key="sec_"+g.section;
+    sectionState[key]=sectionState[key]!==false;
+    h+=`<div class="section" id="${key}">`;
+    h+=`<div class="title"><input class="section-toggle" type="checkbox" id="toggle_${key}" ${sectionState[key]?"checked":""} aria-label="Enable ${esc(g.section)}" onchange="toggleSection('${key}',this.checked)"><span>${esc(g.section)}</span></div>`;
+    if(g.section==="CAMERA & COMPOSITION"){
+      h+=`<div class="field" style="margin-bottom:12px">
+        <label>Camera Control</label>
+        <div class="camera-control">
+          <label class="camera-choice"><input type="radio" name="cameraMode" value="lock" ${cameraMode==="lock"?"checked":""} onchange="setCameraMode('lock')"><span>Lock Reference Camera</span></label>
+          <label class="camera-choice"><input type="radio" name="cameraMode" value="multiple" ${cameraMode==="multiple"?"checked":""} onchange="setCameraMode('multiple')"><span>Multiple Camera Angles</span></label>
+        </div>
+        <div class="camera-views ${cameraMode==="multiple"?"active":""}" id="cameraViews">
+          <div class="field">
+            <label>View Types</label>
+            <select id="cameraView" onchange="cameraView=this.value;generate()">
+              ${["Not Selected","Eye-level","3/4","Elevated","Aerial","Low-angle","Entrance","Courtyard","Detail"].map(o=>`<option ${cameraView===o?"selected":""}>${o}</option>`).join("")}
+            </select>
+          </div>
+        </div>
+      </div>`;
+    }
+    h+=`<div class="grid">`;
+    g.items.forEach(x=>{
+      const opts=["Not Selected",...x.options.filter(o=>String(o)!=="Not Selected")];
+      h+=`<div class="field"><label>${esc(x.label)}</label><select id="${esc(x.id)}">${opts.map(o=>`<option>${esc(o)}</option>`).join("")}</select></div>`;
+    });
+
+    if(g.section==="SITE & ENVIRONMENT"){
+      h+=`<div class="field"><label>Project Location</label><input type="text" id="location" placeholder="Enter project location" value="${esc(locationValue)}"></div>`;
+    }
+    h+="</div></div>";
+  });
+
+  document.getElementById("form").innerHTML=h;
+  const location=document.getElementById("location");
+  if(location){
+    location.addEventListener("input",()=>{locationValue=location.value;generate()});
+  }
+  document.querySelectorAll("select").forEach(x=>{
+    const id=x.id;
+    if(Object.prototype.hasOwnProperty.call(DEFAULTS,id)) x.value=DEFAULTS[id];
+    x.addEventListener("change",generate);
+  });
+  applySectionStates();
+  generate();
+}
+
+function toggleSection(key,on){
+  sectionState[key]=on;
+  applySectionStates();
+  generate();
+}
+
+function applySectionStates(){
+  Object.entries(sectionState).forEach(([key,on])=>{
+    const section=document.getElementById(key);
+    if(!section) return;
+    section.classList.toggle("disabled",!on);
+    const toggle=document.getElementById("toggle_"+key);
+    if(toggle) toggle.checked=on;
+    section.querySelectorAll("select,input[type=radio]").forEach(el=>{
+      if(el.classList.contains("section-toggle")) return;
+      el.disabled=!on;
+    });
+  });
+}
+
+function sectionEnabled(name){
+  return !!sectionState["sec_"+name];
+}
+
+function v(id){
+  const el=document.getElementById(id);
+  return el && !el.disabled && el.value && el.value!=="Not Selected" ? el.value : "";
+}
+
+function line(label,value){
+  return value ? `${label}${value}.` : "";
+}
+
+function generate(){
+  const blocks=[];
+
+  if(sectionEnabled("PROJECT TYPE")){
+    const project=v("project"), style=v("style");
+    const opening=[
+      project?`Create a ${project}`:"Create an architectural visualization",
+      style?`designed in a ${style} architectural language`:""
+    ].filter(Boolean).join(" ")+".";
+    blocks.push(opening);
+    blocks.push(`SOURCE / GEOMETRY AUTHORITY:
+The supplied reference image is the primary authority for architectural form. ${v("geometry")?`Geometry Lock: ${v("geometry")}. `:""}Preserve the existing architectural geometry, massing, proportions, dimensions, building footprints, floor count, roof forms, openings, facade rhythm, columns, slabs, walls, circulation, retaining walls, terrain contours, site levels, camera position, perspective, framing, composition and spatial relationships exactly as provided. Do not redesign, simplify, reinterpret, distort, relocate, add or remove architectural elements.`);
+  }
+
+  if(sectionEnabled("MATERIALS")){
+    const vals=[line("Primary material: ",v("primary")),line("Secondary material: ",v("secondary")),line("Glazing: ",v("glass"))].filter(Boolean);
+    if(vals.length) blocks.push("MATERIALITY:\n"+vals.join(" "));
+  }
+
+  if(sectionEnabled("SITE & ENVIRONMENT")){
+    const vals=[
+      line("Vegetation: ",v("vegetation")),
+      line("Weather: ",v("weather")),
+      line("Time: ",v("time")),
+      line("Lighting quality: ",v("light")),
+      locationValue.trim()?`Project location: ${locationValue.trim()}.`:""
+    ].filter(Boolean);
+    if(vals.length) blocks.push("SITE + ENVIRONMENT:\n"+vals.join(" "));
+  }
+
+  if(sectionEnabled("CAMERA & COMPOSITION")){
+    const vals=[];
+    const height=v("height"), composition=v("composition"), lens=v("lens"), dof=v("dof");
+    if(cameraMode==="lock"){
+      vals.push("Camera control: Lock Reference Camera. Preserve original camera.");
+    }else{
+      vals.push(`Camera control: Multiple Camera Angles.${cameraView && cameraView!=="Not Selected"?` View type: ${cameraView}.`:""}`);
+    }
+    if(height) vals.push(`Camera height: ${height}.`);
+    if(composition) vals.push(`Composition: ${composition}.`);
+    if(lens) vals.push(`Lens: ${lens}.`);
+    if(dof) vals.push(`Depth of field: ${dof}.`);
+    blocks.push("CAMERA + COMPOSITION:\n"+vals.join(" "));
+  }
+
+  if(sectionEnabled("LIFE & PHOTOGRAPHY STYLE")){
+    const vals=[
+      line("People: ",v("people")),
+      line("Vehicles: ",v("vehicles")),
+      line("Photography style: ",v("photo")),
+      line("Color treatment: ",v("grade"))
+    ].filter(Boolean);
+    if(vals.length) blocks.push("LIFE + PHOTOGRAPHIC STORY:\n"+vals.join(" "));
+  }
+
+  if(sectionEnabled("REALISM & OUTPUT")){
+    const vals=[
+      line("Realism level: ",v("realism")),
+      line("Render / image look: ",v("engine")),
+      line("Output quality: ",v("quality"))
+    ].filter(Boolean);
+
+    if(vals.length) blocks.push("REALISM + OUTPUT:\n"+vals.join(" "));
+
+    blocks.push(`PHYSICAL REALISM:
+Physically plausible materials; realistic surface roughness; subtle material variation and imperfections; accurate reflections and refractions; realistic glass; believable texture scale; natural weathering; physically plausible sunlight; global illumination; ambient occlusion; realistic contact shadows; natural atmospheric perspective; accurate human scale; realistic vegetation; photographic dynamic range; natural exposure; accurate white balance; realistic highlight roll-off; crisp but natural detail; no synthetic CGI appearance.
+
+PROFESSIONAL ARCHITECTURAL PHOTOGRAPHY:
+Precise perspective control, straight verticals, minimal lens distortion, natural optical rendering, balanced exposure, controlled highlights and shadows, realistic tonal separation, coherent depth, editorial composition, believable scale and construction detailing.
+
+FAILURE PREVENTION:
+No geometry changes; no warped perspective; no altered camera; no changed rooflines; no extra floors; no missing floors; no moved windows; no invented openings; no redesigned facade; no floating elements; no duplicated architecture; no melted details; no impossible structures; no random balconies; no arbitrary columns; no inconsistent materials; no oversized textures; no plastic surfaces; no excessive reflections; no oversaturation; no excessive contrast; no fake HDR look; no artificial fog; no distorted people; no distorted vehicles; no text; no logos; no watermarks; no visual artifacts.`);
+  }
+
+  const p=blocks.filter(Boolean).join("\n\n");
+  document.getElementById("prompt").textContent=p;
+  document.getElementById("count").textContent=p.length.toLocaleString();
+}
+
+function setCameraMode(mode){
+  cameraMode=mode;
+  const views=document.getElementById("cameraViews");
+  if(views) views.classList.toggle("active",mode==="multiple");
+  const view=document.getElementById("cameraView");
+  if(view) view.disabled=(mode!=="multiple") || !sectionEnabled("CAMERA & COMPOSITION");
+  generate();
+}
+
+let liveSyncTimer=null;
+let liveSyncBusy=false;
+let liveDataSignature="";
+
+function liveDataSignatureOf(data){
+  try{return JSON.stringify(data && data.fields ? data.fields : {});}catch(e){return "";}
+}
+
+function captureCurrentSelections(){
+  const values={};
+  document.querySelectorAll('#form select, #form input[type="text"]').forEach(el=>{
+    if(el.id) values[el.id]=el.value;
+  });
+  return values;
+}
+
+function restoreCurrentSelections(values){
+  Object.keys(values||{}).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    if(el.tagName==='SELECT'){
+      const exists=Array.from(el.options).some(o=>o.value===values[id]);
+      if(exists) el.value=values[id];
+    }else if(el.type==='text'){
+      el.value=values[id] || '';
+    }
+  });
+}
+
+async function refreshOptions(){
+  if(!SHEET_WEB_APP_URL || liveSyncBusy) return;
+  liveSyncBusy=true;
+
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),3500);
+  const current=captureCurrentSelections();
+
+  try{
+    const separator=SHEET_WEB_APP_URL.includes('?')?'&':'?';
+    const r=await fetch(SHEET_WEB_APP_URL+separator+'t='+Date.now(),{
+      cache:'no-store',
+      signal:controller.signal
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+
+    const d=await r.json();
+    if(!d || !d.ok || !d.fields) throw new Error('Invalid live data');
+
+    const signature=liveDataSignatureOf(d);
+
+    if(signature && signature!==liveDataSignature){
+      groups=Object.values(d.fields).reduce((a,f)=>{
+        let g=a.find(x=>x.section===f.section);
+        if(!g){g={section:f.section,items:[]};a.push(g)}
+        g.items.push({
+          id:f.id,
+          label:f.label,
+          options:[...(f.options||[])].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}))
+        });
+        return a;
+      },[]);
+
+      liveDataSignature=signature;
+      buildForm();
+      restoreCurrentSelections(current);
+      applySectionStates();
+      generate();
+    }
+  }catch(e){
+    console.warn('GenStudios.AI live Google Sheets sync:',e.name==='AbortError'?'timeout':e);
+  }finally{
+    clearTimeout(timeout);
+    liveSyncBusy=false;
+  }
+}
+
+async function forceRefreshOptions(){
+  if(!SHEET_WEB_APP_URL){
+    alert("Live sync isn't set up yet: SHEET_WEB_APP_URL is empty.");
+    return;
+  }
+  liveDataSignature=null; // clear so refreshOptions rebuilds even if unchanged
+  await refreshOptions();
+}
+
+function startLiveSync(){
+  if(!SHEET_WEB_APP_URL) return;
+  refreshOptions();
+  if(liveSyncTimer) clearInterval(liveSyncTimer);
+  liveSyncTimer=setInterval(()=>{
+    if(document.visibilityState==='visible') refreshOptions();
+  },3000);
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible') refreshOptions();
+});
+
+async function copyPrompt(){
+  await navigator.clipboard.writeText(document.getElementById("prompt").textContent);
+  alert("Master prompt copied.");
+}
+
+function downloadPrompt(){
+  const b=new Blob([document.getElementById("prompt").textContent],{type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="GenStudios_AI_Master_Prompt.txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function resetAll(){
+  SECTION_ORDER.forEach(s=>sectionState["sec_"+s]=true);
+  cameraMode="lock";
+  cameraView="Not Selected";
+  locationValue="";
+  buildForm();
+}
+
+buildForm();
+startLiveSync();
+</script></body></html>
